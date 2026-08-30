@@ -212,6 +212,10 @@ cmd_review() {
     fi
   done
 
+  # The parentheses around the `ok` comparison are load-bearing: jq 1.6 will not
+  # parse a bare infix comparison as an object value and dies with
+  # "unexpected '>'". jq 1.7+ accepts it, so this only shows up on other people's
+  # machines -- CI runs the real script against whatever jq the runner ships.
   # shellcheck disable=SC2016  # $launched/$skipped/$dir are jq variables
   "$jq_bin" -nc \
     --arg launched "$launched" \
@@ -221,7 +225,7 @@ cmd_review() {
         [ $text | split("\n")[] | select(length > 0) | split("\t")
           | { ($keys[0]): .[0], ($keys[1]): .[1] } ];
       {
-        ok: (rows($launched; ["name", "label"]) | length) > 0,
+        ok: ((rows($launched; ["name", "label"]) | length) > 0),
         error: "",
         default: "",
         dir: $dir,
