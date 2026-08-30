@@ -37,6 +37,74 @@ function pr(overrides = {}) {
   };
 }
 
+describe("settings coercion", () => {
+  // `omarchy bar set <id> <key> <value>` writes strings unless --json is used,
+  // while hand-edited shell.json gives real types. Both must work.
+  describe("settingInt", () => {
+    test("accepts real numbers and numeric strings alike", () => {
+      assert.equal(M.settingInt(10, 10, 3, 25), 10);
+      assert.equal(M.settingInt("10", 10, 3, 25), 10);
+      assert.equal(M.settingInt("  7  ", 10, 3, 25), 7);
+    });
+    test("clamps to the declared range", () => {
+      assert.equal(M.settingInt(1, 10, 3, 25), 3);
+      assert.equal(M.settingInt("999", 10, 3, 25), 25);
+      assert.equal(M.settingInt(-4, 10, 3, 25), 3);
+    });
+    test("falls back when the value is not a number", () => {
+      assert.equal(M.settingInt("banana", 10, 3, 25), 10);
+      assert.equal(M.settingInt(undefined, 10, 3, 25), 10);
+      assert.equal(M.settingInt(null, 10, 3, 25), 10);
+      assert.equal(M.settingInt("", 10, 3, 25), 10);
+    });
+    test("truncates a float rather than producing a fractional page size", () => {
+      assert.equal(M.settingInt("12.9", 10, 3, 25), 12);
+    });
+    test("range bounds are optional", () => {
+      assert.equal(M.settingInt("500", 10), 500);
+    });
+  });
+
+  describe("settingBool", () => {
+    test("passes real booleans straight through", () => {
+      assert.equal(M.settingBool(true, false), true);
+      assert.equal(M.settingBool(false, true), false);
+    });
+    test("accepts the string forms omarchy bar set writes", () => {
+      for (const truthy of ["true", "TRUE", " True ", "1", "yes", "on"]) {
+        assert.equal(M.settingBool(truthy, false), true, `${JSON.stringify(truthy)} should be true`);
+      }
+      for (const falsy of ["false", "FALSE", "0", "no", "off"]) {
+        assert.equal(M.settingBool(falsy, true), false, `${JSON.stringify(falsy)} should be false`);
+      }
+    });
+    test("falls back on anything unrecognised or absent", () => {
+      assert.equal(M.settingBool("maybe", false), false);
+      assert.equal(M.settingBool("maybe", true), true);
+      assert.equal(M.settingBool(undefined, true), true);
+      assert.equal(M.settingBool(null, false), false);
+    });
+  });
+
+  describe("settingChoice", () => {
+    const modes = ["actionable", "all"];
+    test("accepts a declared option, case-insensitively", () => {
+      assert.equal(M.settingChoice("all", modes, "actionable"), "all");
+      assert.equal(M.settingChoice("ALL", modes, "actionable"), "all");
+      assert.equal(M.settingChoice(" actionable ", modes, "actionable"), "actionable");
+    });
+    test("rejects anything not on the list", () => {
+      assert.equal(M.settingChoice("everything", modes, "actionable"), "actionable");
+      assert.equal(M.settingChoice("", modes, "actionable"), "actionable");
+      assert.equal(M.settingChoice(undefined, modes, "actionable"), "actionable");
+      assert.equal(M.settingChoice(null, modes, "actionable"), "actionable");
+    });
+    test("tolerates a missing option list", () => {
+      assert.equal(M.settingChoice("all", undefined, "actionable"), "actionable");
+    });
+  });
+});
+
 describe("parse", () => {
   test("reads a well-formed envelope", () => {
     const raw = JSON.stringify({

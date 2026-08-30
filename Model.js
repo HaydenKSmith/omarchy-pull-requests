@@ -20,6 +20,41 @@ var CATEGORIES = {
   watching:         { weight: 120, label: "Commented",         glyph: "\uF27A", actionable: false, urgent: false }
 }
 
+// Settings coercion.
+//
+// Values reach a widget exactly as they sit in shell.json, and the two ways
+// users write them there disagree about type: hand-editing the JSON gives real
+// numbers and booleans, while `omarchy bar set <id> <key> <value>` stores a
+// *string* unless you remember --json. So "10" and 10, and "true" and true,
+// both have to mean the same thing or a documented command silently does
+// nothing.
+
+function settingInt(value, fallback, min, max) {
+  var n = parseInt(String(value), 10)
+  if (!isFinite(n)) n = fallback
+  if (min !== undefined && n < min) n = min
+  if (max !== undefined && n > max) n = max
+  return n
+}
+
+function settingBool(value, fallback) {
+  if (value === true || value === false) return value
+  if (value === undefined || value === null) return fallback === true
+  var s = String(value).trim().toLowerCase()
+  if (s === "true" || s === "1" || s === "yes" || s === "on") return true
+  if (s === "false" || s === "0" || s === "no" || s === "off") return false
+  return fallback === true
+}
+
+function settingChoice(value, allowed, fallback) {
+  var s = String(value === undefined || value === null ? "" : value).trim().toLowerCase()
+  var options = Array.isArray(allowed) ? allowed : []
+  for (var i = 0; i < options.length; i++) {
+    if (String(options[i]).toLowerCase() === s) return options[i]
+  }
+  return fallback
+}
+
 function emptyEnvelope() {
   return {
     ok: false,
@@ -254,6 +289,9 @@ function heroMeta(envelope, decorated) {
 if (typeof module !== "undefined") {
   module.exports = {
     CATEGORIES: CATEGORIES,
+    settingInt: settingInt,
+    settingBool: settingBool,
+    settingChoice: settingChoice,
     emptyEnvelope: emptyEnvelope,
     parse: parse,
     categoryKey: categoryKey,

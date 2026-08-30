@@ -50,11 +50,7 @@ Item {
   }
 
   function intSetting(name, fallback, min, max) {
-    var n = parseInt(String(setting(name, fallback)), 10)
-    if (!isFinite(n)) n = fallback
-    if (n < min) n = min
-    if (n > max) n = max
-    return n
+    return Model.settingInt(setting(name, fallback), fallback, min, max)
   }
 
   function refresh() {

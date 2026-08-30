@@ -90,8 +90,36 @@ omarchy-shell hayden.pull-requests refresh
 
 ## Settings
 
-Set these on the widget's entry in `~/.config/omarchy/shell.json`, or with
-`omarchy bar set hayden.pull-requests <key> <value>`.
+There are two ways to change a setting, and they behave slightly differently.
+
+**Edit `~/.config/omarchy/shell.json`** and save — the shell hot-reloads it, no
+restart needed. Find the widget's entry under `bar.layout.right` and add keys
+to it:
+
+```json
+{
+  "id": "hayden.pull-requests",
+  "refreshIntervalSec": 600,
+  "pageSize": 8,
+  "countMode": "all"
+}
+```
+
+**Or use the CLI**, which edits the same entry for you:
+
+```bash
+omarchy bar set hayden.pull-requests pageSize 8
+omarchy bar set hayden.pull-requests countMode all
+omarchy bar set hayden.pull-requests hideWhenEmpty true --json   # note --json
+```
+
+> `omarchy bar set` writes the value as a **string** unless you pass `--json`,
+> so it stores `"true"` rather than `true`. This widget coerces `"true"`,
+> `"1"`, `"yes"` and `"on"` (and their negatives) as well as real booleans, and
+> accepts `"8"` as readily as `8`, so either form works here. Pass `--json` if
+> you want the file to be tidy.
+
+To put a setting back to its default, delete the key from the entry.
 
 | Key | Default | Range | What it does |
 |---|---|---|---|
@@ -100,14 +128,6 @@ Set these on the widget's entry in `~/.config/omarchy/shell.json`, or with
 | `countMode` | `actionable` | `actionable` \| `all` | whether the bar counts only ● rows or every open PR |
 | `searchLimit` | `40` | 10–100 | results fetched per search; the panel says so when it truncates |
 | `hideWhenEmpty` | `false` | | hide the icon entirely when nothing needs you |
-
-```json
-{
-  "id": "hayden.pull-requests",
-  "refreshIntervalSec": 600,
-  "pageSize": 8
-}
-```
 
 The widget polls once per bar surface, so a multi-monitor setup makes one
 request per monitor per interval. At the default five minutes that is a

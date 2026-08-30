@@ -29,13 +29,9 @@ Panel {
   readonly property string fontFamily: bar ? bar.fontFamily : Style.font.family
   readonly property bool vertical: bar ? bar.vertical : false
 
-  readonly property int pageSize: {
-    var n = parseInt(String(setting("pageSize", 10)), 10)
-    if (!isFinite(n)) n = 10
-    return Math.max(3, Math.min(25, n))
-  }
-  readonly property string countMode: String(setting("countMode", "actionable")) === "all" ? "all" : "actionable"
-  readonly property bool hideWhenEmpty: setting("hideWhenEmpty", false) === true
+  readonly property int pageSize: Model.settingInt(setting("pageSize", 10), 10, 3, 25)
+  readonly property string countMode: Model.settingChoice(setting("countMode", "actionable"), ["actionable", "all"], "actionable")
+  readonly property bool hideWhenEmpty: Model.settingBool(setting("hideWhenEmpty", false), false)
 
   readonly property int badgeCount: countMode === "all" ? prs.totalCount : prs.actionableCount
   readonly property int pageCount: Model.pageCount(prs.totalCount, pageSize)
