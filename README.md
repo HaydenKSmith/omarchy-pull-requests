@@ -121,6 +121,19 @@ omarchy bar set hayden.pull-requests hideWhenEmpty true --json   # note --json
 
 To put a setting back to its default, delete the key from the entry.
 
+**There is no settings GUI** — not for this widget, and not for any widget.
+Omarchy 4.0.1's on-bar gestures cover layout only (drag empty bar space to move
+the bar to another edge, double-click the centre to toggle transparency, drag
+widgets to reorder). Values live in `shell.json`.
+
+The groundwork for a settings panel is in place though: `BarWidgetRegistry`
+carries each widget's `schema` and `settingsForm`, and `shell.qml` notes that
+"the settings panel reads metadata from the registry". Nothing consumes it yet.
+The `barWidget.schema` block in this plugin's `manifest.json` is written to
+Omarchy's conventions (`integer` / `enum` / `boolean`, each with a label,
+description and default) so the widget populates that panel for free when it
+ships — `test/manifest.test.js` guards the vocabulary.
+
 | Key | Default | Range | What it does |
 |---|---|---|---|
 | `refreshIntervalSec` | `300` | 60–3600 | how often to poll GitHub |

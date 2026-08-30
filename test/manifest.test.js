@@ -66,6 +66,41 @@ describe("manifest.json", () => {
     }
   });
 
+  // Omarchy's BarWidgetRegistry carries this schema so a settings panel can
+  // render a form from it. No such panel ships in Omarchy 4.0.1 yet, so
+  // nothing validates these at runtime -- a wrong type would only show up as a
+  // mis-rendered control whenever it does land. Pin the vocabulary the
+  // first-party manifests use.
+  test("every schema entry uses a type Omarchy recognises", () => {
+    const known = ["integer", "string", "enum", "boolean", "path", "multiselect"];
+    for (const entry of manifest.barWidget.schema) {
+      assert.ok(known.includes(entry.type), `${entry.key} has unknown type ${entry.type}`);
+    }
+  });
+
+  test("a fixed set of choices is an enum, not a string with options", () => {
+    for (const entry of manifest.barWidget.schema) {
+      if (entry.options) {
+        assert.equal(entry.type, "enum", `${entry.key} lists options so it must be an enum`);
+      }
+    }
+  });
+
+  test("an enum default is one of its own options", () => {
+    for (const entry of manifest.barWidget.schema) {
+      if (entry.type !== "enum") continue;
+      assert.ok(Array.isArray(entry.options) && entry.options.length > 0, `${entry.key} needs options`);
+      assert.ok(entry.options.includes(entry.defaultValue), `${entry.key} default is not an option`);
+    }
+  });
+
+  test("every setting carries a label and a description for the form", () => {
+    for (const entry of manifest.barWidget.schema) {
+      assert.ok(entry.label && entry.label.length > 0, `${entry.key} needs a label`);
+      assert.ok(entry.description && entry.description.length > 0, `${entry.key} needs a description`);
+    }
+  });
+
   test("numeric settings declare a range that contains their default", () => {
     for (const entry of manifest.barWidget.schema) {
       if (entry.type !== "integer") continue;

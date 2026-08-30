@@ -30,6 +30,7 @@
         "key": "refreshIntervalSec",
         "type": "integer",
         "label": "Refresh interval (seconds)",
+        "description": "How often to poll GitHub for pull requests.",
         "min": 60,
         "max": 3600,
         "step": 30,
@@ -39,6 +40,7 @@
         "key": "pageSize",
         "type": "integer",
         "label": "Pull requests per page",
+        "description": "How many pull requests each page of the panel shows.",
         "min": 3,
         "max": 25,
         "step": 1,
@@ -46,15 +48,20 @@
       },
       {
         "key": "countMode",
-        "type": "string",
+        "type": "enum",
         "label": "Bar count shows",
-        "options": ["actionable", "all"],
+        "description": "Whether the bar counts only the pull requests needing a response, or every open pull request that involves you.",
+        "options": [
+          "actionable",
+          "all"
+        ],
         "defaultValue": "actionable"
       },
       {
         "key": "searchLimit",
         "type": "integer",
         "label": "Max pull requests fetched per search",
+        "description": "How many results to fetch per search. The panel says so when there were more.",
         "min": 10,
         "max": 100,
         "step": 10,
@@ -64,6 +71,7 @@
         "key": "hideWhenEmpty",
         "type": "boolean",
         "label": "Hide the icon when nothing needs you",
+        "description": "Remove the icon from the bar entirely when nothing needs you, instead of dimming it.",
         "defaultValue": false
       }
     ]
