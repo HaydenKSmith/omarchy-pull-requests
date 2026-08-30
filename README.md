@@ -1,5 +1,7 @@
 # Pull requests — an Omarchy bar widget
 
+[![CI](https://github.com/HaydenKSmith/omarchy-pull-requests/actions/workflows/ci.yml/badge.svg)](https://github.com/HaydenKSmith/omarchy-pull-requests/actions/workflows/ci.yml)
+
 Shows how many GitHub pull requests are waiting on **you**, and lists them ten
 at a time. Click a row to open it in your browser.
 
