@@ -22,6 +22,18 @@ describe("manifest.json", () => {
     }
   });
 
+  // `omarchy plugin remove <id>` resolves $PLUGINS_DIR/$id, so the id is also
+  // the on-disk directory name. The plugin marketplace additionally reserves
+  // the omarchy.* namespace and treats ids as permanent, so this is worth
+  // pinning rather than discovering after someone has installed it.
+  test("stays out of the reserved omarchy.* namespace", () => {
+    assert.ok(!manifest.id.startsWith("omarchy."), "omarchy.* is reserved for first-party plugins");
+  });
+
+  test("uses a reverse-DNS namespaced id", () => {
+    assert.match(manifest.id, /^[a-z0-9]+(\.[a-z0-9-]+){2,}$/);
+  });
+
   test("uses an id that is safe as a directory name", () => {
     assert.match(manifest.id, /^[a-z0-9][a-z0-9.-]*$/);
     assert.ok(!manifest.id.includes("/"));

@@ -56,14 +56,34 @@ Requires [Omarchy](https://omarchy.org/) 4.x (the Quickshell-based shell),
 
 ```bash
 omarchy plugin add https://github.com/HaydenKSmith/omarchy-pull-requests.git
-omarchy plugin enable hayden.pull-requests
-omarchy bar move hayden.pull-requests --section right
+omarchy plugin enable io.github.haydenksmith.pull-requests
+omarchy bar move io.github.haydenksmith.pull-requests --section right
 ```
 
-`omarchy plugin add` clones into `~/.config/omarchy/plugins/hayden.pull-requests/`
+`omarchy plugin add` clones into `~/.config/omarchy/plugins/io.github.haydenksmith.pull-requests/`
 and leaves the plugin disabled so you can read the code first — it runs
 unsandboxed inside the shell process. Later, `omarchy plugin update
-hayden.pull-requests` fast-forwards the checkout.
+io.github.haydenksmith.pull-requests` fast-forwards the checkout.
+
+### Updating
+
+```bash
+omarchy plugin update io.github.haydenksmith.pull-requests
+```
+
+### Removing
+
+```bash
+omarchy plugin disable io.github.haydenksmith.pull-requests
+omarchy plugin remove io.github.haydenksmith.pull-requests
+```
+
+`remove` deletes `~/.config/omarchy/plugins/io.github.haydenksmith.pull-requests/` after
+taking a timestamped backup alongside it. The plugin writes nothing outside
+its own directory and its entry in `~/.config/omarchy/shell.json`; if you
+removed it by hand, delete that entry from `bar.layout` too. Nothing else on
+your system is touched — no state files, no caches, no credentials (it reads
+GitHub through your existing `gh` login and never stores a token).
 
 ## Using it
 
@@ -77,15 +97,15 @@ GitHub dashboard · `Esc` closes.
 Bind a key to summon it directly, in `~/.config/hypr/bindings.lua`:
 
 ```lua
-o.bind("SUPER CTRL", "P", "omarchy-shell hayden.pull-requests toggle")
+o.bind("SUPER CTRL", "P", "omarchy-shell io.github.haydenksmith.pull-requests toggle")
 ```
 
 It also answers IPC, which is handy for scripts and status lines:
 
 ```bash
-omarchy-shell hayden.pull-requests count    # -> 2
-omarchy-shell hayden.pull-requests status   # -> 2 pull requests need you · 3 open
-omarchy-shell hayden.pull-requests refresh
+omarchy-shell io.github.haydenksmith.pull-requests count    # -> 2
+omarchy-shell io.github.haydenksmith.pull-requests status   # -> 2 pull requests need you · 3 open
+omarchy-shell io.github.haydenksmith.pull-requests refresh
 ```
 
 ## Settings
@@ -98,7 +118,7 @@ to it:
 
 ```json
 {
-  "id": "hayden.pull-requests",
+  "id": "io.github.haydenksmith.pull-requests",
   "refreshIntervalSec": 600,
   "pageSize": 8,
   "countMode": "all"
@@ -108,9 +128,9 @@ to it:
 **Or use the CLI**, which edits the same entry for you:
 
 ```bash
-omarchy bar set hayden.pull-requests pageSize 8
-omarchy bar set hayden.pull-requests countMode all
-omarchy bar set hayden.pull-requests hideWhenEmpty true --json   # note --json
+omarchy bar set io.github.haydenksmith.pull-requests pageSize 8
+omarchy bar set io.github.haydenksmith.pull-requests countMode all
+omarchy bar set io.github.haydenksmith.pull-requests hideWhenEmpty true --json   # note --json
 ```
 
 > `omarchy bar set` writes the value as a **string** unless you pass `--json`,

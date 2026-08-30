@@ -13,8 +13,8 @@ import "Model.js" as Model
 // the default browser.
 Panel {
   id: root
-  moduleName: "hayden.pull-requests"
-  ipcTarget: "hayden.pull-requests"
+  moduleName: "io.github.haydenksmith.pull-requests"
+  ipcTarget: "io.github.haydenksmith.pull-requests"
   manageIpc: false
 
   property int page: 0

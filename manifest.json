@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "hayden.pull-requests",
+  "id": "io.github.haydenksmith.pull-requests",
   "name": "Pull requests",
   "version": "1.0.0",
   "author": "Hayden",
