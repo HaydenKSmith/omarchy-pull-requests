@@ -9,7 +9,7 @@
     "url": "git+https://github.com/HaydenKSmith/omarchy-pull-requests.git"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
     "test": "node --test --experimental-test-coverage --test-coverage-exclude=test/** --test-coverage-lines=100 --test-coverage-branches=90 --test-coverage-functions=100",

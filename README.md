@@ -154,7 +154,7 @@ npm run check      # both
 ```
 
 `npm test` uses Node's built-in test runner and needs **no dependencies** —
-just Node 20+ and `jq`. Only the linters need `npm install`.
+just Node 22+ and `jq`. Only the linters need `npm install`.
 
 The suite is 118 tests over four areas:
 
