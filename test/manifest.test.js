@@ -90,10 +90,28 @@ describe("manifest.json", () => {
     }
   });
 
-  test("a fixed set of choices is an enum, not a string with options", () => {
+  // Options belong to the two types that render a list of them. A `string`
+  // carrying `options` is the mistake this guards: it looks like a choice in
+  // the manifest and renders as a free-text field.
+  test("a fixed set of choices is an enum or a multiselect, not a string with options", () => {
     for (const entry of manifest.barWidget.schema) {
       if (entry.options) {
-        assert.equal(entry.type, "enum", `${entry.key} lists options so it must be an enum`);
+        assert.ok(
+          ["enum", "multiselect"].includes(entry.type),
+          `${entry.key} lists options so it must be an enum or a multiselect`
+        );
+      }
+    }
+  });
+
+  test("a multiselect defaults to a list drawn from its own options", () => {
+    for (const entry of manifest.barWidget.schema) {
+      if (entry.type !== "multiselect") continue;
+      assert.ok(Array.isArray(entry.options) && entry.options.length > 0, `${entry.key} needs options`);
+      assert.ok(Array.isArray(entry.defaultValue), `${entry.key} must default to a list`);
+      const values = entry.options.map((o) => (typeof o === "string" ? o : o.value));
+      for (const chosen of entry.defaultValue) {
+        assert.ok(values.includes(chosen), `${entry.key} default ${chosen} is not an option`);
       }
     }
   });
@@ -122,12 +140,40 @@ describe("manifest.json", () => {
   });
 
   test("the runtime files the QML pulls in are all present", () => {
-    for (const file of ["Panel.qml", "Service.qml", "Model.js", "fetch.sh", "query.graphql", "transform.jq"]) {
+    for (const file of [
+      "Panel.qml",
+      "Service.qml",
+      "Model.js",
+      "Agents.js",
+      "fetch.sh",
+      "agents.sh",
+      "query.graphql",
+      "transform.jq",
+    ]) {
       assert.ok(fs.existsSync(path.join(ROOT, file)), `missing ${file}`);
     }
   });
 
-  test("fetch.sh is executable", () => {
-    assert.ok(fs.statSync(path.join(ROOT, "fetch.sh")).mode & 0o111);
+  test("the helper scripts are executable", () => {
+    for (const script of ["fetch.sh", "agents.sh"]) {
+      assert.ok(fs.statSync(path.join(ROOT, script)).mode & 0o111, `${script} is not executable`);
+    }
+  });
+
+  // The picker only ever offers installed agents, but the settings form has to
+  // list every agent a machine could have -- and agents.sh is the roster of
+  // record, so the two must not drift.
+  test("the agent options match the roster agents.sh can launch", () => {
+    const script = fs.readFileSync(path.join(ROOT, "agents.sh"), "utf8");
+    const roster = script
+      .slice(script.indexOf("ROSTER=("), script.indexOf(")", script.indexOf("ROSTER=(")))
+      .split("\n")
+      .map((line) => /"([a-z]+):([^"]+)"/.exec(line.trim()))
+      .filter(Boolean)
+      .map((m) => ({ value: m[1], label: m[2] }));
+
+    assert.ok(roster.length > 0, "could not read the roster out of agents.sh");
+    const entry = manifest.barWidget.schema.find((s) => s.key === "reviewAgents");
+    assert.deepEqual(entry.options, roster);
   });
 });

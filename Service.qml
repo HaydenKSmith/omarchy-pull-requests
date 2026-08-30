@@ -2,10 +2,13 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import "Model.js" as Model
+import "Agents.js" as Agents
 
-// Owns the polling of GitHub and the decorated pull-request list. The heavy
-// lifting lives in fetch.sh (one GraphQL round trip) and Model.js (parsing and
-// classification); this item is the QML-facing state plus the timers.
+// Owns the polling of GitHub and the decorated pull-request list, plus the
+// coding agents a pull request can be sent to for review. The heavy lifting
+// lives in fetch.sh (one GraphQL round trip), agents.sh (discovery and
+// launching), and Model.js / Agents.js (parsing and classification); this item
+// is the QML-facing state plus the timers.
 Item {
   id: root
 
@@ -32,6 +35,19 @@ Item {
   readonly property int searchLimit: intSetting("searchLimit", 40, 10, 100)
   readonly property bool busy: fetchProcess.running
 
+  // Coding agents. Discovered lazily -- nothing about the bar count needs
+  // them, so the first look happens when the panel is opened.
+  property var agentsEnvelope: Agents.emptyEnvelope()
+  property bool agentsLoaded: false
+  property string dispatchText: ""
+  property var _dispatchPr: null
+
+  readonly property var agents: Agents.decorate(agentsEnvelope.agents, agentsEnvelope.defaultAgent)
+  readonly property string defaultAgent: String(agentsEnvelope.defaultAgent || "")
+  readonly property bool agentsBusy: agentsProcess.running
+  readonly property bool sending: reviewProcess.running
+  readonly property string reviewDir: String(setting("reviewDir", "") || "")
+
   // The plugin can be installed anywhere under ~/.config/omarchy/plugins, so
   // resolve the helper relative to this QML file rather than hardcoding a path.
   readonly property string pluginDir: {
@@ -40,9 +56,12 @@ Item {
     return decodeURIComponent(url).replace(/\/+$/, "")
   }
   readonly property string helperPath: pluginDir + "/fetch.sh"
+  readonly property string agentsPath: pluginDir + "/agents.sh"
 
   property string _output: ""
   property string _error: ""
+  property string _agentsOutput: ""
+  property string _reviewOutput: ""
 
   function setting(name, fallback) {
     var value = settings ? settings[name] : undefined
@@ -85,6 +104,34 @@ Item {
     items = []
     everLoaded = true
     lastRefreshMs = Date.now()
+  }
+
+  // Agents change only when one is installed or uninstalled, so the list is
+  // fetched once and then only on request.
+  function loadAgents(force) {
+    if (agentsProcess.running) return
+    if (agentsLoaded && force !== true) return
+    _agentsOutput = ""
+    agentsProcess.command = ["bash", agentsPath, "list"]
+    agentsProcess.running = true
+  }
+
+  // Opens one terminal window per agent, each reviewing `pr`. Returns false
+  // when there is nothing to send, so the panel can stay put and say why.
+  function sendReview(pr, names) {
+    if (reviewProcess.running) return false
+    if (!pr || !pr.url) return false
+    var selection = Agents.normalizeSelection(names, agents)
+    if (selection.length === 0) return false
+
+    _dispatchPr = pr
+    _reviewOutput = ""
+    dispatchText = "Sending to " + Agents.selectionSummary(selection, agents) + "…"
+    var command = ["bash", agentsPath, "review"]
+    if (reviewDir !== "") command = command.concat(["--dir", reviewDir])
+    reviewProcess.command = command.concat([String(pr.url)]).concat(selection)
+    reviewProcess.running = true
+    return true
   }
 
   function openPr(pr) {
@@ -143,6 +190,36 @@ Item {
       // means bash itself failed (missing helper, unreadable plugin dir).
       if (exitCode === 0 && stdout.trim() !== "") root.apply(stdout)
       else root.applyFailure(stderr.trim() || ("Pull request helper exited with status " + exitCode))
+    }
+  }
+
+  // agents.sh keeps fetch.sh's contract: exit 0 with a JSON envelope, so a
+  // missing dependency reads as a sentence in the picker rather than a crash.
+  Process {
+    id: agentsProcess
+    running: false
+    command: []
+    stdout: StdioCollector { id: agentsStdout; waitForEnd: true; onStreamFinished: root._agentsOutput = text }
+    onExited: function(exitCode) {
+      var stdout = String(agentsStdout.text || root._agentsOutput || "")
+      var parsed = Agents.parseEnvelope(stdout)
+      if (exitCode !== 0 && parsed.error === "") parsed.error = "Agent helper exited with status " + exitCode
+      root.agentsEnvelope = parsed
+      root.agentsLoaded = true
+    }
+  }
+
+  Process {
+    id: reviewProcess
+    running: false
+    command: []
+    stdout: StdioCollector { id: reviewStdout; waitForEnd: true; onStreamFinished: root._reviewOutput = text }
+    onExited: function(exitCode) {
+      var stdout = String(reviewStdout.text || root._reviewOutput || "")
+      var parsed = Agents.parseEnvelope(stdout)
+      if (exitCode !== 0 && parsed.error === "") parsed.error = "Agent helper exited with status " + exitCode
+      root.dispatchText = Agents.dispatchSummary(parsed, root._dispatchPr)
+      root._dispatchPr = null
     }
   }
 }

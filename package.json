@@ -1,8 +1,8 @@
 {
   "name": "omarchy-pull-requests",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
-  "description": "Omarchy bar widget showing the GitHub pull requests waiting on you",
+  "description": "Omarchy bar widget showing the GitHub pull requests waiting on you, and sending them to coding agents for review",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -17,7 +17,7 @@
     "test:watch": "node --test --watch",
     "lint": "npm run lint:js && npm run lint:sh && npm run lint:jq && npm run lint:json && npm run lint:qml",
     "lint:js": "eslint .",
-    "lint:sh": "shellcheck --severity=style --shell=bash fetch.sh scripts/lint-qml.sh",
+    "lint:sh": "shellcheck --severity=style --shell=bash fetch.sh agents.sh scripts/lint-qml.sh",
     "lint:jq": "jq -n -f transform.jq --arg partial '' >/dev/null && echo 'transform.jq: OK'",
     "lint:json": "jq -e . manifest.json >/dev/null && echo 'manifest.json: OK'",
     "lint:qml": "bash scripts/lint-qml.sh",

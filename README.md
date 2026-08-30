@@ -3,7 +3,8 @@
 [![CI](https://github.com/HaydenKSmith/omarchy-pull-requests/actions/workflows/ci.yml/badge.svg)](https://github.com/HaydenKSmith/omarchy-pull-requests/actions/workflows/ci.yml)
 
 Shows how many GitHub pull requests are waiting on **you**, and lists them ten
-at a time. Click a row to open it in your browser.
+at a time. Click a row to open it in your browser, or send it to the coding
+agents installed on this machine for a review.
 
 ![The pull request panel](docs/panel.png)
 
@@ -91,8 +92,8 @@ GitHub through your existing `gh` login and never stores a token).
 click opens <https://github.com/pulls>.
 
 **In the panel** — `↑`/`↓` or `j`/`k` move · `←`/`→` or `h`/`l` change page ·
-`Enter` opens the highlighted pull request · `r` refreshes · `g` opens the
-GitHub dashboard · `Esc` closes.
+`Enter` opens the highlighted pull request · `a` sends it to a coding agent ·
+`r` refreshes · `g` opens the GitHub dashboard · `Esc` closes.
 
 Bind a key to summon it directly, in `~/.config/hypr/bindings.lua`:
 
@@ -106,6 +107,45 @@ It also answers IPC, which is handy for scripts and status lines:
 omarchy-shell io.github.haydenksmith.pull-requests count    # -> 2
 omarchy-shell io.github.haydenksmith.pull-requests status   # -> 2 pull requests need you · 3 open
 omarchy-shell io.github.haydenksmith.pull-requests refresh
+omarchy-shell io.github.haydenksmith.pull-requests review   # -> sent acme/api #421
+```
+
+## Sending a pull request to your coding agents
+
+Press `a` on a row (or click its ✈ button) and the panel turns into a picker of
+the coding agents installed on this machine — the same roster
+`omarchy default agent` knows, filtered to the ones you actually have. Tick the
+ones you want and press `Enter`.
+
+Each agent opens in its own terminal window, with the same app id
+(`org.omarchy.agent`) and the same "don't stop to ask" flags `omarchy agent`
+uses, and gets the same brief: read the pull request with `gh pr view` and
+`gh pr diff`, report correctness bugs, security and data-loss risks, missing
+test coverage, and real simplifications, then say plainly when the change looks
+correct. Sending to several agents at once and comparing what each one finds is
+the point of the "all" button.
+
+**In the picker** — `↑`/`↓` or `j`/`k` move · `Space` ticks an agent · `a`
+ticks or clears all of them · `Enter` sends · `Esc` goes back to the list.
+
+Reviews are read-only by contract. The brief tells every agent not to edit
+files, commit, push, or post anything to GitHub — it has no checkout to edit in
+any case, since it reads the pull request through the GitHub CLI. That matters
+because agents are launched with their approval prompts disabled; without it, an
+agent with `--yolo` and a spare thought could start "fixing" what it reviewed.
+
+Reviews run wherever `reviewDir` points — `~/Work` by default, or your home
+directory when that does not exist, matching what `omarchy agent` does. Nothing
+is checked out, so the agent sees the diff and the discussion but not the
+surrounding codebase. Point `reviewDir` at a checkout if you would rather it
+had both.
+
+The `review` IPC call skips the picker entirely and sends the pull request at
+the top of the list to whatever `reviewAgents` names, which makes a keybinding
+out of it:
+
+```lua
+o.bind("SUPER CTRL", "R", "omarchy-shell io.github.haydenksmith.pull-requests review")
 ```
 
 ## Settings
@@ -161,6 +201,8 @@ ships — `test/manifest.test.js` guards the vocabulary.
 | `countMode` | `actionable` | `actionable` \| `all` | whether the bar counts only ● rows or every open PR |
 | `searchLimit` | `40` | 10–100 | results fetched per search; the panel says so when it truncates |
 | `hideWhenEmpty` | `false` | | hide the icon entirely when nothing needs you |
+| `reviewAgents` | `[]` | any of the roster | which agents a review goes to by default; empty means whichever agent `omarchy agent` launches |
+| `reviewDir` | `""` | a path | where a review agent starts; empty means `~/Work`, or `$HOME` when that does not exist |
 
 The widget polls once per bar surface, so a multi-monitor setup makes one
 request per monitor per interval. At the default five minutes that is a
@@ -186,19 +228,35 @@ If `gh` lives somewhere unusual, pin it: `PR_WIDGET_GH_BIN=/path/to/gh`.
 ## How it fits together
 
 ```
-Panel.qml     bar button + popup, keyboard/mouse navigation, pagination
-  └ Service.qml   polling, process lifecycle, opening URLs
-      └ fetch.sh      one `gh api graphql` call, normalized to a JSON envelope
-          ├ query.graphql   the four searches + the PullRequest fragment
-          └ transform.jq    merge, deduplicate, flatten
-  └ Model.js    classification, sorting, pagination, formatting
+Panel.qml     bar button + popup, keyboard/mouse navigation, pagination,
+              and the agent picker (a second mode of the same panel)
+  └ Service.qml   polling, process lifecycle, opening URLs, dispatching reviews
+      ├ fetch.sh      one `gh api graphql` call, normalized to a JSON envelope
+      │   ├ query.graphql   the four searches + the PullRequest fragment
+      │   └ transform.jq    merge, deduplicate, flatten
+      └ agents.sh     which agents are installed, and launching a review in each
+  ├ Model.js    classification, sorting, pagination, formatting
+  └ Agents.js   selection coercion and the sentences the picker prints
 ```
 
-`Model.js` is deliberately free of QML types: it is plain script-style
-JavaScript with a guarded `module.exports` tail, so the same file is loaded by
-QML via `import "Model.js" as Model` **and** by Node in the test suite. That is
-why it uses `var` and top-level function declarations — do not "modernise" it
-into an ES module or wrap it in an IIFE, or the QML side gets an empty object.
+`agents.sh` is the single source of truth for agents: the roster, the argv each
+one is launched with, and the review brief all live there, so `Agents.js` never
+decides which agents exist — it only formats what it is handed. The picker
+offers the same roster `omarchy default agent` accepts, filtered to what
+`command -v` can find. A manifest test reads the roster back out of the script
+to keep the settings form from drifting away from it.
+
+The picker is a second mode of the existing panel rather than a popup inside
+it: it wants the same `j`/`k`/`Enter` handling the list already has, and a
+popup within a popup is another surface to keep anchored, themed, and
+dismissable.
+
+`Model.js` and `Agents.js` are deliberately free of QML types: they are plain
+script-style JavaScript with a guarded `module.exports` tail, so the same files
+are loaded by QML via `import "Model.js" as Model` **and** by Node in the test
+suite. That is why they use `var` and top-level function declarations — do not
+"modernise" them into ES modules or wrap them in an IIFE, or the QML side gets
+an empty object.
 
 ## Development
 
@@ -218,6 +276,8 @@ The suite is 118 tests over four areas:
 | `test/model.test.js` | every classification rule and precedence pair, sorting, pagination edges, relative-time boundaries, summary strings |
 | `test/transform.test.js` | runs the real `transform.jq` over fixtures: deduplication, flag merging, ghost authors, live-vs-outdated threads, team reviewers, truncation |
 | `test/fetch.test.js` | runs the real `fetch.sh` against a stub `gh`: every failure branch, error truncation, argument construction |
+| `test/agents.test.js` | selection coercion (`omarchy bar set` stores strings), what a stale or uninstalled choice resolves to, and every sentence the picker prints |
+| `test/agents-sh.test.js` | runs the real `agents.sh` against a sandboxed `PATH` and `HOME`: discovery, the exact argv each agent is launched with, the read-only brief, working directory, and URL rejection |
 | `test/manifest.test.js` | the manifest contract with Omarchy's `PluginRegistry` |
 
 Coverage is enforced in CI at **100% lines, 100% functions, 90% branches** for

@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "id": "io.github.haydenksmith.pull-requests",
   "name": "Pull requests",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "Hayden",
   "license": "MIT",
-  "description": "Shows how many GitHub pull requests are waiting on you, and opens them in the browser from a paged dropdown.",
+  "description": "Shows how many GitHub pull requests are waiting on you, opens them in the browser from a paged dropdown, and sends any of them to the coding agents installed on this machine for review.",
   "kinds": [
     "bar-widget"
   ],
@@ -14,7 +14,7 @@
   },
   "barWidget": {
     "displayName": "Pull requests",
-    "description": "Counts the open pull requests that need your response and lists them ten at a time.",
+    "description": "Counts the open pull requests that need your response, lists them ten at a time, and hands one to your coding agents for a review.",
     "category": "Development",
     "allowMultiple": false,
     "defaultSection": "right",
@@ -23,7 +23,9 @@
       "pageSize": 10,
       "countMode": "actionable",
       "searchLimit": 40,
-      "hideWhenEmpty": false
+      "hideWhenEmpty": false,
+      "reviewAgents": [],
+      "reviewDir": ""
     },
     "schema": [
       {
@@ -73,6 +75,61 @@
         "label": "Hide the icon when nothing needs you",
         "description": "Remove the icon from the bar entirely when nothing needs you, instead of dimming it.",
         "defaultValue": false
+      },
+      {
+        "key": "reviewAgents",
+        "type": "multiselect",
+        "label": "Agents to review with",
+        "description": "Which coding agents a review is sent to by default. Only the ones installed on this machine are offered, and the picker still lets you change the choice per pull request. Leave empty to use whichever agent `omarchy agent` launches.",
+        "noSelectionText": "Omarchy's default agent",
+        "placeholderText": "Search agents...",
+        "emptyText": "No agents",
+        "options": [
+          {
+            "value": "claude",
+            "label": "Claude Code"
+          },
+          {
+            "value": "codex",
+            "label": "Codex"
+          },
+          {
+            "value": "gemini",
+            "label": "Gemini"
+          },
+          {
+            "value": "copilot",
+            "label": "GitHub Copilot"
+          },
+          {
+            "value": "opencode",
+            "label": "OpenCode"
+          },
+          {
+            "value": "crush",
+            "label": "Crush"
+          },
+          {
+            "value": "grok",
+            "label": "Grok"
+          },
+          {
+            "value": "pi",
+            "label": "Pi"
+          },
+          {
+            "value": "omp",
+            "label": "Oh My Pi"
+          }
+        ],
+        "defaultValue": []
+      },
+      {
+        "key": "reviewDir",
+        "type": "path",
+        "label": "Review working directory",
+        "description": "Where a review agent starts. Leave empty for ~/Work, or your home directory when that does not exist. Reviews read the pull request through the GitHub CLI, so this only decides which directory the agent trusts.",
+        "defaultValue": ""
       }
     ]
   }

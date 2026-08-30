@@ -49,4 +49,61 @@ function runFetchWithStubGh(tmpdir, { stdout = "", stderr = "", code = 0, ghBin 
   return JSON.parse(result);
 }
 
-module.exports = { ROOT, FIXTURES, fixturePath, readFixture, runTransform, runFetchWithStubGh };
+// Runs agents.sh with a sandboxed PATH, so "installed" means "this test said
+// so" rather than "this machine happens to have codex". `agents` are the fake
+// binaries to put on PATH; the launcher is stubbed through
+// PR_WIDGET_LAUNCH_TUI and appends one argv per line to `<tmpdir>/launched`,
+// which is what lets a test assert the exact command each agent was given.
+function runAgents(tmpdir, args, { agents = [], defaultAgent = "", launcherExit = 0 } = {}) {
+  const bin = path.join(tmpdir, "bin");
+  fs.mkdirSync(bin, { recursive: true });
+  for (const agent of agents) {
+    const file = path.join(bin, agent);
+    fs.writeFileSync(file, "#!/usr/bin/env bash\nexit 0\n");
+    fs.chmodSync(file, 0o755);
+  }
+
+  const launchLog = path.join(tmpdir, "launched");
+  const launcher = path.join(tmpdir, "launch-tui");
+  fs.writeFileSync(
+    launcher,
+    "#!/usr/bin/env bash\n" +
+      `printf '%s\\n' "$PWD" >> ${JSON.stringify(launchLog)}\n` +
+      `for a in "$@"; do printf 'ARG %s\\n' "$a" >> ${JSON.stringify(launchLog)}; done\n` +
+      `exit ${launcherExit}\n`
+  );
+  fs.chmodSync(launcher, 0o755);
+
+  // A home of its own, so the default-agent file this test writes is the only
+  // one agents.sh can find.
+  const home = path.join(tmpdir, "home");
+  fs.mkdirSync(path.join(home, ".config", "omarchy", "defaults"), { recursive: true });
+  if (defaultAgent) {
+    fs.writeFileSync(path.join(home, ".config", "omarchy", "defaults", "agent"), defaultAgent + "\n");
+  }
+
+  // PATH is replaced rather than prepended: omarchy-default-agent must not be
+  // reachable, or the test would read this machine's choice instead of its own.
+  const jqDir = path.dirname(execFileSync("bash", ["-c", "command -v jq"], { encoding: "utf8" }).trim());
+  const out = execFileSync("bash", [path.join(ROOT, "agents.sh"), ...args], {
+    encoding: "utf8",
+    env: {
+      PATH: `${bin}:${jqDir}:/usr/bin:/bin`,
+      HOME: home,
+      PR_WIDGET_LAUNCH_TUI: launcher,
+    },
+  });
+
+  const launched = fs.existsSync(launchLog) ? fs.readFileSync(launchLog, "utf8") : "";
+  return { envelope: JSON.parse(out), launched, home };
+}
+
+module.exports = {
+  ROOT,
+  FIXTURES,
+  fixturePath,
+  readFixture,
+  runTransform,
+  runFetchWithStubGh,
+  runAgents,
+};
