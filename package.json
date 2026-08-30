@@ -1,0 +1,30 @@
+{
+  "name": "omarchy-pull-requests",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Omarchy bar widget showing the GitHub pull requests waiting on you",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HaydenKSmith/omarchy-pull-requests.git"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test --experimental-test-coverage --test-coverage-exclude=test/** --test-coverage-lines=100 --test-coverage-branches=90 --test-coverage-functions=100",
+    "test:only": "node --test",
+    "test:watch": "node --test --watch",
+    "lint": "npm run lint:js && npm run lint:sh && npm run lint:jq && npm run lint:json && npm run lint:qml",
+    "lint:js": "eslint .",
+    "lint:sh": "shellcheck --severity=style --shell=bash fetch.sh scripts/lint-qml.sh",
+    "lint:jq": "jq -n -f transform.jq --arg partial '' >/dev/null && echo 'transform.jq: OK'",
+    "lint:json": "jq -e . manifest.json >/dev/null && echo 'manifest.json: OK'",
+    "lint:qml": "bash scripts/lint-qml.sh",
+    "check": "npm run lint && npm test"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.0",
+    "shellcheck": "^4.1.0"
+  }
+}

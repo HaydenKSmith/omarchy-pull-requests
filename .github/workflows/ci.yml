@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: test (node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['20', '22', '24']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      # The suite shells out to the real jq so transform.jq is under test
+      # rather than a re-implementation of it.
+      - name: Check jq is available
+        run: jq --version
+
+      - run: npm ci
+
+      # Unit tests plus coverage thresholds (see package.json). No network:
+      # every GitHub call is served by a stub gh pinned through
+      # PR_WIDGET_GH_BIN.
+      - name: Test with coverage
+        run: npm test
+
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      - name: ESLint
+        run: npm run lint:js
+
+      - name: ShellCheck
+        run: npm run lint:sh
+
+      - name: Bash syntax
+        run: bash -n fetch.sh && bash -n scripts/lint-qml.sh
+
+      - name: jq filter
+        run: npm run lint:jq
+
+      - name: manifest JSON
+        run: npm run lint:json
+
+      # qmllint needs both Qt and the Omarchy shell's qs.* modules, so it only
+      # has anything to check on an Omarchy machine. The script skips cleanly
+      # here; run `npm run lint:qml` locally before pushing QML changes.
+      - name: qmllint (skipped without Omarchy)
+        run: npm run lint:qml

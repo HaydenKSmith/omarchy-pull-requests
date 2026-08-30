@@ -1,0 +1,81 @@
+{
+  "data": {
+    "viewer": {
+      "login": "octo-dev"
+    },
+    "involves": {
+      "issueCount": 50,
+      "nodes": [
+        {
+          "number": 1,
+          "title": "Change 1",
+          "url": "https://github.com/acme/api/pull/1",
+          "isDraft": false,
+          "createdAt": "2026-08-01T00:00:00Z",
+          "updatedAt": "2026-08-25T10:00:00Z",
+          "reviewDecision": null,
+          "mergeable": "MERGEABLE",
+          "additions": 12,
+          "deletions": 3,
+          "headRefName": "topic",
+          "baseRefName": "main",
+          "repository": {
+            "nameWithOwner": "acme/api",
+            "isPrivate": false
+          },
+          "author": {
+            "login": "peer-dev"
+          },
+          "comments": {
+            "totalCount": 2
+          },
+          "reviewRequests": {
+            "nodes": [
+              {
+                "requestedReviewer": {
+                  "__typename": "User",
+                  "login": "octo-dev"
+                }
+              },
+              {
+                "requestedReviewer": {
+                  "__typename": "Team",
+                  "slug": "platform"
+                }
+              },
+              {
+                "requestedReviewer": null
+              }
+            ]
+          },
+          "reviewThreads": {
+            "nodes": []
+          },
+          "commits": {
+            "nodes": [
+              {
+                "commit": {
+                  "statusCheckRollup": {
+                    "state": "SUCCESS"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "review": {
+      "issueCount": 0,
+      "nodes": []
+    },
+    "mentions": {
+      "issueCount": 0,
+      "nodes": []
+    },
+    "assigned": {
+      "issueCount": 0,
+      "nodes": []
+    }
+  }
+}

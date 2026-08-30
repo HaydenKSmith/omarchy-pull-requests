@@ -1,0 +1,321 @@
+{
+  "data": {
+    "viewer": {
+      "login": "octo-dev"
+    },
+    "involves": {
+      "issueCount": 4,
+      "nodes": [
+        {
+          "number": 1,
+          "title": "Change 1",
+          "url": "https://github.com/acme/api/pull/1",
+          "isDraft": false,
+          "createdAt": "2026-08-01T00:00:00Z",
+          "updatedAt": "2026-08-25T10:00:00Z",
+          "reviewDecision": null,
+          "mergeable": "MERGEABLE",
+          "additions": 12,
+          "deletions": 3,
+          "headRefName": "topic",
+          "baseRefName": "main",
+          "repository": {
+            "nameWithOwner": "acme/api",
+            "isPrivate": false
+          },
+          "author": {
+            "login": "peer-dev"
+          },
+          "comments": {
+            "totalCount": 2
+          },
+          "reviewRequests": {
+            "nodes": [
+              {
+                "requestedReviewer": {
+                  "__typename": "User",
+                  "login": "octo-dev"
+                }
+              },
+              {
+                "requestedReviewer": {
+                  "__typename": "Team",
+                  "slug": "platform"
+                }
+              },
+              {
+                "requestedReviewer": null
+              }
+            ]
+          },
+          "reviewThreads": {
+            "nodes": []
+          },
+          "commits": {
+            "nodes": [
+              {
+                "commit": {
+                  "statusCheckRollup": {
+                    "state": "SUCCESS"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "number": 2,
+          "title": "Change 2",
+          "url": "https://github.com/acme/api/pull/2",
+          "isDraft": false,
+          "createdAt": "2026-08-01T00:00:00Z",
+          "updatedAt": "2026-08-20T00:00:00Z",
+          "reviewDecision": null,
+          "mergeable": "CONFLICTING",
+          "additions": 12,
+          "deletions": 3,
+          "headRefName": "topic",
+          "baseRefName": "main",
+          "repository": {
+            "nameWithOwner": "acme/api",
+            "isPrivate": false
+          },
+          "author": null,
+          "comments": {
+            "totalCount": 0
+          },
+          "reviewRequests": {
+            "nodes": []
+          },
+          "reviewThreads": {
+            "nodes": [
+              {
+                "isResolved": false,
+                "isOutdated": false
+              },
+              {
+                "isResolved": true,
+                "isOutdated": false
+              },
+              {
+                "isResolved": false,
+                "isOutdated": true
+              }
+            ]
+          },
+          "commits": {
+            "nodes": []
+          }
+        },
+        {},
+        {
+          "number": 3,
+          "title": "Change 3",
+          "url": "https://github.com/acme/web/pull/3",
+          "isDraft": true,
+          "createdAt": "2026-08-01T00:00:00Z",
+          "updatedAt": "2026-08-20T00:00:00Z",
+          "reviewDecision": null,
+          "mergeable": "MERGEABLE",
+          "additions": 12,
+          "deletions": 3,
+          "headRefName": "topic",
+          "baseRefName": "main",
+          "repository": {
+            "nameWithOwner": "acme/web",
+            "isPrivate": true
+          },
+          "author": {
+            "login": "octo-dev"
+          },
+          "comments": {
+            "totalCount": 0
+          },
+          "reviewRequests": {
+            "nodes": []
+          },
+          "reviewThreads": {
+            "nodes": []
+          },
+          "commits": {
+            "nodes": [
+              {
+                "commit": {
+                  "statusCheckRollup": null
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "review": {
+      "issueCount": 1,
+      "nodes": [
+        {
+          "number": 1,
+          "title": "Change 1",
+          "url": "https://github.com/acme/api/pull/1",
+          "isDraft": false,
+          "createdAt": "2026-08-01T00:00:00Z",
+          "updatedAt": "2026-08-25T10:00:00Z",
+          "reviewDecision": null,
+          "mergeable": "MERGEABLE",
+          "additions": 12,
+          "deletions": 3,
+          "headRefName": "topic",
+          "baseRefName": "main",
+          "repository": {
+            "nameWithOwner": "acme/api",
+            "isPrivate": false
+          },
+          "author": {
+            "login": "peer-dev"
+          },
+          "comments": {
+            "totalCount": 2
+          },
+          "reviewRequests": {
+            "nodes": [
+              {
+                "requestedReviewer": {
+                  "__typename": "User",
+                  "login": "octo-dev"
+                }
+              },
+              {
+                "requestedReviewer": {
+                  "__typename": "Team",
+                  "slug": "platform"
+                }
+              },
+              {
+                "requestedReviewer": null
+              }
+            ]
+          },
+          "reviewThreads": {
+            "nodes": []
+          },
+          "commits": {
+            "nodes": [
+              {
+                "commit": {
+                  "statusCheckRollup": {
+                    "state": "SUCCESS"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "mentions": {
+      "issueCount": 1,
+      "nodes": [
+        {
+          "number": 1,
+          "title": "Change 1",
+          "url": "https://github.com/acme/api/pull/1",
+          "isDraft": false,
+          "createdAt": "2026-08-01T00:00:00Z",
+          "updatedAt": "2026-08-25T10:00:00Z",
+          "reviewDecision": null,
+          "mergeable": "MERGEABLE",
+          "additions": 12,
+          "deletions": 3,
+          "headRefName": "topic",
+          "baseRefName": "main",
+          "repository": {
+            "nameWithOwner": "acme/api",
+            "isPrivate": false
+          },
+          "author": {
+            "login": "peer-dev"
+          },
+          "comments": {
+            "totalCount": 2
+          },
+          "reviewRequests": {
+            "nodes": [
+              {
+                "requestedReviewer": {
+                  "__typename": "User",
+                  "login": "octo-dev"
+                }
+              },
+              {
+                "requestedReviewer": {
+                  "__typename": "Team",
+                  "slug": "platform"
+                }
+              },
+              {
+                "requestedReviewer": null
+              }
+            ]
+          },
+          "reviewThreads": {
+            "nodes": []
+          },
+          "commits": {
+            "nodes": [
+              {
+                "commit": {
+                  "statusCheckRollup": {
+                    "state": "SUCCESS"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "assigned": {
+      "issueCount": 1,
+      "nodes": [
+        {
+          "number": 3,
+          "title": "Change 3",
+          "url": "https://github.com/acme/web/pull/3",
+          "isDraft": true,
+          "createdAt": "2026-08-01T00:00:00Z",
+          "updatedAt": "2026-08-20T00:00:00Z",
+          "reviewDecision": null,
+          "mergeable": "MERGEABLE",
+          "additions": 12,
+          "deletions": 3,
+          "headRefName": "topic",
+          "baseRefName": "main",
+          "repository": {
+            "nameWithOwner": "acme/web",
+            "isPrivate": true
+          },
+          "author": {
+            "login": "octo-dev"
+          },
+          "comments": {
+            "totalCount": 0
+          },
+          "reviewRequests": {
+            "nodes": []
+          },
+          "reviewThreads": {
+            "nodes": []
+          },
+          "commits": {
+            "nodes": [
+              {
+                "commit": {
+                  "statusCheckRollup": null
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

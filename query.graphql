@@ -1,0 +1,35 @@
+# Four searches in one request, so a single round trip can tell the difference
+# between "someone asked you to review this", "you were assigned", "you were
+# mentioned", and "you are merely involved" (author or commenter). GitHub's
+# `involves:` qualifier does NOT cover review requests, which is why `review`
+# has to be its own search rather than a filter over `involves`.
+query($involves: String!, $review: String!, $mentions: String!, $assigned: String!, $limit: Int!) {
+  viewer { login }
+  involves: search(query: $involves, type: ISSUE, first: $limit) { issueCount nodes { ...pr } }
+  review:   search(query: $review,   type: ISSUE, first: $limit) { issueCount nodes { ...pr } }
+  mentions: search(query: $mentions, type: ISSUE, first: $limit) { issueCount nodes { ...pr } }
+  assigned: search(query: $assigned, type: ISSUE, first: $limit) { issueCount nodes { ...pr } }
+}
+
+fragment pr on PullRequest {
+  number
+  title
+  url
+  isDraft
+  createdAt
+  updatedAt
+  reviewDecision
+  mergeable
+  additions
+  deletions
+  headRefName
+  baseRefName
+  repository { nameWithOwner isPrivate }
+  author { login }
+  comments { totalCount }
+  reviewRequests(first: 20) {
+    nodes { requestedReviewer { __typename ... on User { login } ... on Team { slug } } }
+  }
+  reviewThreads(first: 50) { nodes { isResolved isOutdated } }
+  commits(last: 1) { nodes { commit { statusCheckRollup { state } } } }
+}

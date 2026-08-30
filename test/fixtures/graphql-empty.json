@@ -1,0 +1,23 @@
+{
+  "data": {
+    "viewer": {
+      "login": "octo-dev"
+    },
+    "involves": {
+      "issueCount": 0,
+      "nodes": []
+    },
+    "review": {
+      "issueCount": 0,
+      "nodes": []
+    },
+    "mentions": {
+      "issueCount": 0,
+      "nodes": []
+    },
+    "assigned": {
+      "issueCount": 0,
+      "nodes": []
+    }
+  }
+}
